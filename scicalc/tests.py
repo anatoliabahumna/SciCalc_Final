@@ -1,0 +1,40 @@
+
+import unittest
+from scicalc.main import run
+from scicalc.evaluator import Evaluator
+
+class CalcTests(unittest.TestCase):
+    def once(self,expr,exp,ev=None):
+        r=run(expr+"\n",ev)
+        self.assertAlmostEqual(r[0],exp)
+
+    def test_basic_ops(self):
+        self.once("3+4*2",11)
+        self.once("(3+4)*2",14)
+
+    def test_unary(self):
+        self.once("-2+5",3)
+
+    def test_power(self):
+        self.once("2^3^2",512)
+
+    def test_variables(self):
+        ev=Evaluator()
+        run("x=10\n",ev)
+        self.once("x/2",5,ev)
+
+    def test_builtins(self):
+        self.once("sin(0)",0)
+        self.once("abs(-3)+sqrt(4)",5)
+
+    def test_root_func(self):
+        self.once("root(27,3)",3)
+
+    def test_div_zero_error(self):
+        self.assertTrue("div0" in run("1/0\n")[0])
+
+    def test_syntax_error(self):
+        self.assertTrue("ERROR" in run("(3+4\n")[0])
+
+if __name__=='__main__':
+    unittest.main()

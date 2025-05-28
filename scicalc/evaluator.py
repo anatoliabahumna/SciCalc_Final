@@ -1,0 +1,32 @@
+
+from .ast import Num,Var,Unary,Bin,Assign,Call
+from .function_registry import FunctionRegistry
+from .errors import EvaluationError
+import math
+class Evaluator:
+    def __init__(self):
+        self.vars={}
+        self.funcs=FunctionRegistry()
+    def eval(self,node):
+        if isinstance(node,Num): return node.v
+        if isinstance(node,Var):
+            if node.n not in self.vars: raise EvaluationError('undef var')
+            return self.vars[node.n]
+        if isinstance(node,Unary):
+            v=self.eval(node.e)
+            return v if node.op=='+' else -v
+        if isinstance(node,Bin):
+            l=self.eval(node.l); r=self.eval(node.r)
+            if node.op=='+': return l+r
+            if node.op=='-': return l-r
+            if node.op=='*': return l*r
+            if node.op=='/':
+                if r==0: raise EvaluationError('div0')
+                return l/r
+            if node.op=='^': return math.pow(l,r)
+        if isinstance(node,Assign):
+            v=self.eval(node.e); self.vars[node.n]=v; return v
+        if isinstance(node,Call):
+            a=[self.eval(x) for x in node.a]
+            return self.funcs.call(node.n,a)
+        raise EvaluationError('bad node')
