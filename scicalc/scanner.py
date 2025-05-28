@@ -11,6 +11,14 @@ def scan(text:str):
         # Skip whitespace
         if ch in ' \t\r':
             r.next(); continue
+        # Skip UTF-8 BOM
+        if ch == '\ufeff':
+            r.next(); continue
+        # Skip Python-style comments
+        if ch == '#':
+            while r.peek() and r.peek() != '\n':
+                r.next()
+            continue
         # Handle newlines
         if ch=='\n':
             r.next(); yield Token(T.NEWLINE,'\n',None,r.line,r.col); continue
